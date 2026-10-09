@@ -8,7 +8,7 @@ on:
 # Set default execution directory for all run steps to 'app'
 defaults:
   run:
-    working-directory: ./app
+    working-directory: ./node-app
     
 jobs:
   run-weather-app:
