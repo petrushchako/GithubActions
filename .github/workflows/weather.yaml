@@ -1,0 +1,29 @@
+name: Fetch Weather
+
+on: 
+    push: 
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v7
+    Install:
+        runs-on: ubuntu-lates
+        steps:
+            - name: Setup Node 24
+              uses: actions/setup-node@v4
+              with:
+                node-version: 24
+            
+            - name: Install Dependencies
+              run: npm install
+
+    Weather:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Run Weather Script
+              run: npm start
