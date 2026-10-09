@@ -5,14 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Set default execution directory for all run steps to 'app'
+defaults:
+  run:
+    working-directory: ./app
+    
 jobs:
   run-weather-app:
     runs-on: ubuntu-latest
-
-    # Set working directory if your package.json is inside a subdirectory (e.g., node-app)
-    # defaults:
-    #   run:
-    #     working-directory: ./node-app
 
     steps:
       - name: Checkout Repository
