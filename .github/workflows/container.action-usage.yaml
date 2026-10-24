@@ -1,0 +1,16 @@
+name: Run Container Action
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Chckout code
+              uses: actions/checkout@v7
+
+            - name: Run my container action
+              uses: ./.github/actions/container-action
+              with:
+                name: "Alex"
