@@ -1,8 +1,8 @@
 name: Fetch Weather
 
 on: 
-  push: 
-    branches: [main]
+  # push: 
+  #   branches: [main]
   workflow_dispatch:
 
 # Set default execution directory for all run steps to 'app'
