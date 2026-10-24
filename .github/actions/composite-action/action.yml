@@ -1,0 +1,14 @@
+name: Composite Action Example
+description: Runs a command with JavaScript
+
+inputs:
+  name:
+    description: 'The name of the person to greet'
+    required: true
+    default: 'fellow Github Action user'
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: echo "Hello ${{ inputs.name }}"
