@@ -5,6 +5,7 @@
 > - [Introduction to Docker Containers](https://learn.microsoft.com/en-us/training/modules/intro-to-docker-containers/)
 > - [Metadata syntax for Github Actions](https://docs.github.com/actions/creating-actions/metadata-syntax-for-github-actions)
 > - [Security hardedning guidance for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+> - [Usage limits, billing and administration](https://docs.github.com/actions/reference/usage-limits-billing-and-administration)
 
 ### What is GitHub Actions?
 GitHub Actions are packaged scripts to automate tasks in a software-development workflow in GitHub.
@@ -169,4 +170,19 @@ When creating workflows in GitHub Actions, you can reference actions from variou
 > **Note**
 >
 > Actions in private repositories can also be referenced, but they require proper authentication and permissions.
+
+<br><br><br>
+
+## Identify the components of gitHub Actions
+![](img/1.github-actions-workflow-components.png)
+
+A GitHub Actions execution hierarchy flows as follows: **Events** trigger **Workflows**, which contain **Jobs**, which execute **Steps**, which run **Actions** or shell commands.
+
+| Component    | Description                                                            | Key Attributes / Reference                                                                    |
+|--------------|------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| **Workflow** | Automated CI/CD process defined in `.github/workflows/`.               | Triggered by repository **events** (e.g., `push`); must contain at least one job.             |
+| **Job**      | A distinct execution block assigned to a specific runtime environment. | Configured via `runs-on:` (targets GitHub-hosted or self-hosted runners, VMs, or containers). |
+| **Step**     | A sequential task or execution block within a job.                     | Sequentially runs shell commands (`run:`) or actions (`uses:`).                               |
+| **Action**   | Standalone, reusable executable units or commands.                     | Referenced via custom paths, community actions (e.g., `actions/checkout`), or inline scripts. |
+
 
