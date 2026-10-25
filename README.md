@@ -1,5 +1,11 @@
 # GithubActions
 
+> **Links:**
+>
+> - [Introduction to Docker Containers](https://learn.microsoft.com/en-us/training/modules/intro-to-docker-containers/)
+> - [Metadata syntax for Github Actions](https://docs.github.com/actions/creating-actions/metadata-syntax-for-github-actions)
+> - [Security hardedning guidance for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+
 ### What is GitHub Actions?
 GitHub Actions are packaged scripts to automate tasks in a software-development workflow in GitHub.
 
@@ -121,3 +127,46 @@ jobs:
         run: npm run build
 
 ```
+
+#### Referencing actions in workflows
+When creating workflows in GitHub Actions, you can reference actions from various sources:
+1. **A published Docker container image on Docker Hub**<br>Workflows can reference actions that are published as Docker container images on Docker Hub. These actions are containerized and include all dependencies required to execute the action. To use such action, you specify image in the `uses` attribure:
+    ```yaml
+    steps:
+      - name: Run a Docker action
+        uses: docker://<docker-image-name>:<version>
+    ```
+
+2. **Any public repository**<br>Actions in public repositories can be directly referenced in your workflows. These actions are accessible to anyone and can be used by specifying the repository name and version (Git ref, SHA or tag) in `uses` attribute:
+    ```yaml
+    steps:
+      - name: Use a public action
+        uses: actions/checkout@v3
+    ```
+
+> **Important**
+>
+> For better security, use a full commit SAH when referencing actions - not just a tag like `@v3`
+> Example: `uses: actions/checkout@c2c1744e079e0dd11c8e0af4a96064ca4f6a2e9e`
+
+
+3. **The same repository as your workflow file**<br>You can reference actions stored in the same repository as your workflow file. This feature is useful for custom actions that are specific to your project. To reference such actions, use a relative path to the action's directory:
+
+    ```yaml
+    steps:
+      - name: Use a local action
+        uses: ./.github/actions/my-action
+    ```
+
+4. **An enterprise marketplace**<br>If your organization uses GitHub Enterprise, you can reference actions from your enterprise's private marketplace. These actions are curated and managed by your organization, ensuring compliance wth internal standards:
+
+    ```yaml
+    steps:
+      - name: Use an enterprise marketplace action
+        uses: enterprise-org/action-name@v1
+    ```
+
+> **Note**
+>
+> Actions in private repositories can also be referenced, but they require proper authentication and permissions.
+
