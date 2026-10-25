@@ -1,14 +1,14 @@
-name: "Container Action Sample"
-description: "Runs a command inside a Docker image"
+name: Container Action Example
+description: Runs a command inside a Docker image
 
 inputs:
   name:
-    description: 'The name of the person to greet'
+    description: The name of the person to greet
     required: true
     default: 'fellow Github Action user'
 
 runs:
-  using: "docker"
+  using: docker
   image: "docker://alpine:latest"
   args:
     - 'echo'

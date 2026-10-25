@@ -1,0 +1,12 @@
+name: JavaScript Action Example
+description: Runs JavaScript Action example
+
+inputs:
+  name:
+    description: Provided name to be greated
+    required: true
+    default: Alex
+
+runs:
+  using: node24
+  main: 'index.js'
