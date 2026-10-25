@@ -10,3 +10,7 @@ inputs:
 runs:
   using: node24
   main: 'index.js'
+
+branding:
+    icon: "mic"
+    color: "purple"
