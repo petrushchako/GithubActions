@@ -186,3 +186,47 @@ A GitHub Actions execution hierarchy flows as follows: **Events** trigger **Work
 | **Action**   | Standalone, reusable executable units or commands.                     | Referenced via custom paths, community actions (e.g., `actions/checkout`), or inline scripts. |
 
 
+<br><hr><br><br>
+
+## Configure a GitHub Actions workflow
+
+#### Cofnigure workflow to run for scheduled events
+The `schedule` event allows you to trigger a workflow to run at specific UTC time using [POSIX cron syntax](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07). 
+
+![](img/2.scheduled-events.png)
+
+For example, if you want to run a workflow every 15 minutes, the schedule event looks like the following example:
+
+```yaml
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+```
+
+Or if you want to execute job at 3:00am every Saturaday:
+
+```yaml
+on:
+  schedule:
+    - cron: '0 3 * * SUN'
+```
+
+> The shortest interval you can run a scheduled workflow is once every 5 minutes
+
+<br>
+
+#### Configure workflow to run for manual events
+In additon to scheduled events, you can manually trigger a workflow by using the `workflow_dispatch` event. This event allows you to run workflow by using the GitHub REST API or by selecting the **Run workflow** button in the **Actions** tab within your repository on GitHub. Using `workflow_dispatch`, you can choose on which branch and optionally with what input parameters you want to trigger the job. 
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+```
+

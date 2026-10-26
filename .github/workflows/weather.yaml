@@ -4,6 +4,8 @@ on:
   # push: 
   #   branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types: [weather_check]
 
 # Set default execution directory for all run steps to 'app'
 defaults:
