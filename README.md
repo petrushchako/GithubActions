@@ -6,6 +6,9 @@
 > - [Metadata syntax for Github Actions](https://docs.github.com/actions/creating-actions/metadata-syntax-for-github-actions)
 > - [Security hardedning guidance for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
 > - [Usage limits, billing and administration](https://docs.github.com/actions/reference/usage-limits-billing-and-administration)
+> - [Workflow syntax for GitHub Actions](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsif)
+
+
 
 ### What is GitHub Actions?
 GitHub Actions are packaged scripts to automate tasks in a software-development workflow in GitHub.
@@ -230,3 +233,130 @@ on:
         description: 'Test scenario tags'
 ```
 
+In addition to `workflow_dispatch`, you can use the GitHub API to trigger a webhook event called `repository_dispatch`. This event allows you to trigger a workflow for activity that occurs outside of GitHub. It essentially serves as an HTTP request to your repository asking GitHub to trigger a workflow off an action or webhook. Using this manual event requires you to do two things: 
+    1. Send a POST request to the GitHub endpoint `/repos/{owner}/{repo}/dispatches` with the webhook event names in the request body.
+    2. Configure your workflow to use the `repository_dispatch` event.
+
+<br>
+
+#### Configure workflows to run for webhook events
+
+Lastly, you can configure a workflow to run when specific webhook events occur on GitHub. You can trigger most webhook events from more than once activity for a webhook. If multiple activities exist for a webhook, you can specify an activity type to triggerthe workflow. 
+
+For example, you can run a workflow for the `check_run` event, but only for the `rerequested` or `requested_action` activity types.
+
+```yaml
+on:
+  check_run:
+    types: [rerequested, requested_action]
+```
+
+##### `repository_dispatch`
+`repository_dispatch` is a custom event in GitHub Actions that allows external systems (or even other GitHub workflows) to manually trigger workflows by sending a POST request to the GitHub API. It enables flexible automation and integration with outside tools, scripts, or systems that need to start woekflows in your repo.
+
+###### Use cases
+- Trigger workflows from external CI/CD tools.
+- Coordinate multi-repo deployment (for example, Repo A finishes build -> triggers Repo B).
+- Start Automation based on external events (webhooks, monitoring alerts, CRON jobs outside GitHub).
+- Chain workflow executions between repositories or within monorepos.
+
+**Example workflow that listens to repository_dispatch**
+```yaml
+name: Custom Dispatch Listener
+
+on:
+  repository_dispatch:
+    types: [run-tests, deploy-to-prod]
+
+jobs:
+  run:
+    run-on: ubuntu-latest
+    steps:
+      - name: Echo the payload
+        run: | 
+          echo "Event type: ${{ github.event.action }}"
+          echo "Payload value: ${{ github.event.client_payload.env }}"
+```
+
+##### Key elements
+- `types`<br>Optional. Defines custom event types like `run-tests`, `deploy-to-prod`, etc.
+- `github.event.client_payload`<br>Access to any other custom data passed in the dispatch event.
+- `github.event.action`<br>Name of the `event_type` sent
+
+##### Trigger the event via API
+You must send a POST request to the GitHub REST API v3 endpoint:
+```sh
+POST https://api.github.com/repos/OWNER/REPO/dispatches
+```
+
+##### Authorization
+- Requires a personal access token (PAT) with repo scope.
+- For Organizations, ensure proper access setting for your token.
+
+###### Sample commands structure
+```sh
+curl -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: token YOUR_GITHUB_TOKEN" \
+  https://api.github.com/repos/OWNER/REPO/dispatches \
+  -d '{"event_type":"run-tests","client_payload":{"env":"staging"}}'
+```
+
+**Payload structure**:
+
+```json
+{
+  "event_type": "run-tests",
+  "client_payload": {
+    "env": "staging"
+  }
+}
+```
+
+##### Use conditional keywords
+Within your workflow file, you can access context information and evaluate expressions. Although expressions are commonly used with the condition `if` keyword in a workflow file to determine whether a step should run or not, you can use any supported context and expression to create a conditional.
+
+It is important to know that when using conditional in your workflow, you need to use specific syntax `${{ <expression> }}`. This syntax tells GitHub to evaluate an expression rather than treat it as a string.
+
+For example, a workflow that uses the `if` conditional to check if the `github.ref` (the branch or tag ref that triggered the workflow run) matches `refs/heads/main`. In order to proceed, the workflow would look somthing like this:
+
+```yaml
+name: CI
+on: push
+jobs:
+  prod-check:
+    if: github.ref == `refs/head/main`
+    runs-on: ubuntu-latest
+    steps:
+      ...
+```
+> Notice that in this example the `${{  }}` are missing from syntax. With some expressions, like the `if` conditional, you can omit the expression syntax. GitHub automatically evaluates some of these common xpressions, but you can alwaus include them.
+
+
+##### Disable and delete workflows
+After adding a workflow to your repository, you might find a situation where you want to temporarily disable the workflow. You can stop a workflow from being triggered without having to delete the file from the repo, either on GitHub or through the GitHub REST API. When you wish to enable the workflow again, you can easily do it using the same methods.
+![](img/3.disable-workflow.png)
+
+Disabling a workflow can be useful in some of the following situations:
+- An error on a workflow is producing too many or wrong requests impacting external services negatively.
+- You want to temporarily pause a workflow that isn't critical and is consuming too many minutes on your account.
+- You want to pause a workflow that's sending requests to a service that is down.
+- You're working on a fork, and you don't need all the functionality of some workflows it includes (like scheduled workflows).
+
+You can also cancel a workflow run that's in progress in the GitHub UI from the Actions tab or by using the GitHub API endpoint `DELETE /repos/{owner}/{repo}/actions/runs/{run_id}`. Keep in mind that when you cancel a workflow run, GitHub cancels all of its jobs and steps within that run.
+
+
+##### Use specific version of an action
+
+When using action, it is recommended to specify a version to preent unexpected behaviour with udpates. See methods used to lock a specific action version:
+```yaml
+steps:    
+  # Reference a specific commit
+  - uses: actions/setup-node@c46424eee26de4078d34105d3de3cc4992202b1e
+  # Reference the major version of a release
+  - uses: actions/setup-node@v1
+  # Reference a minor version of a release
+  - uses: actions/setup-node@v1.2
+  # Reference a branch
+  - uses: actions/setup-node@main
+```
